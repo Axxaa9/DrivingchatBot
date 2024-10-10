@@ -12,7 +12,7 @@ import asyncio
 from dotenv import load_dotenv
 import requests  # Add this import for making HTTP requests
 import google.generativeai as genai
-
+#from google.cloud import aiplatform
 
 
 # Load environment variables from docker/.env file
@@ -64,8 +64,10 @@ class ChatController:
 
     def call_gemini(self, prompt):
         try:
-            model= genai.GenerativeModel("gemini-1.5-flash")
-            response=model.generate_content(prompt)
+            #model = aiplatform.GenerativeModel(endpoint_id="gemini-1.0-pro")
+            #model= genai.get_model("models/chat-bison-001")
+            model=genai.GenerativeModel(model="gemini-1.5-flash")
+            response = model.generate_content(prompt=prompt)
             #response = self.genai_client.generate_content(prompt=prompt, model=self.genai_model_name)
             return response.choices[0].text if response.choices else "No response received from Gemini."
         except Exception as e:

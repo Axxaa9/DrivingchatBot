@@ -44,9 +44,14 @@ function getMachineFailurePrediction() {
         .then(data => {
             const predictionResult = document.getElementById('prediction-result');
             const warningSign = document.getElementById('warning-sign');
+            const normalbehaviour = document.getElementById('prediction-value');
 
            // predictionResult.textContent = data.prediction;
-
+            if (data.prediction === 0) {
+                normalbehaviour.style.display = 'block'; // Show warning sign
+            } else {
+                normalbehaviour.style.display = 'none'; // Hide warning sign
+            }
             if (data.prediction === 1) {
                 warningSign.style.display = 'block'; // Show warning sign
             } else {
