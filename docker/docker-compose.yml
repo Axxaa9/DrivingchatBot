@@ -1,0 +1,29 @@
+services:
+  mongodb:
+    image: mongo:7-jammy
+
+    container_name: mongodb_GenDrive
+
+    ports:
+      - "27018:27017"
+
+    volumes:
+      - mongodbData:/data/db
+
+    env_file:
+      - .env
+
+
+    networks:
+      - backend
+    
+    restart: always
+
+
+
+
+networks:
+  backend:
+
+volumes:
+  mongodbData:
