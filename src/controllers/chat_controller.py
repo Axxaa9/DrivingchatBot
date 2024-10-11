@@ -15,6 +15,7 @@ import google.generativeai as genai
 #from google.cloud import aiplatform
 
 
+
 # Load environment variables from docker/.env file
 load_dotenv(dotenv_path='docker/.env')
 
@@ -52,34 +53,41 @@ class ChatController:
         chat_collection = self.db_client['chat_history']
         return list(chat_collection.find().sort("timestamp", DESCENDING))
 
-    def handle_chat(self, user_input):
-        try:
-            full_prompt = self.humanized_prompt.format(user_input=user_input)
-            gemini_response = self.call_gemini(full_prompt)
-            self.save_chat(user_input, gemini_response)
-            return gemini_response
-        except Exception as e:
-            print(f"Error in handle_chat: {e}")
-            return "An error occurred while processing your request."
+    async def handle_chat(self, user_input):
+            try:
+                # Check if the user is asking about the car status
+                if any(keyword in user_input.lower() for keyword in ["car status", "car problem", "status of my car"]):
+                    # Await the get_car_status call
+                    return await self.get_car_status()
+
+                # Otherwise, proceed with the normal chat flow
+                full_prompt = self.humanized_prompt.format(user_input=user_input)
+                gemini_response = self.call_gemini(full_prompt)
+                self.save_chat(user_input, gemini_response)
+                return gemini_response
+            except Exception as e:
+                print(f"Error in handle_chat: {e}")
+                return "An error occurred while processing your request."
 
     def call_gemini(self, prompt):
         try:
             #model = aiplatform.GenerativeModel(endpoint_id="gemini-1.0-pro")
             #model= genai.get_model("models/chat-bison-001")
-            model=genai.GenerativeModel(model="gemini-1.5-flash")
-            response = model.generate_content(prompt=prompt)
+            model=genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
+            #print(response.text)
             #response = self.genai_client.generate_content(prompt=prompt, model=self.genai_model_name)
-            return response.choices[0].text if response.choices else "No response received from Gemini."
+            return response.text if response.text else "No response received from Gemini."
         except Exception as e:
             print(f"Error in call_gemini: {e}")
             return "An error occurred while contacting the Gemini model."
 
-    def get_car_status(self):
-        latest_data = self.get_latest_sensor_data()
+    async def get_car_status(self):
+        latest_data = await self.get_latest_sensor_data()
         if not latest_data:
             return "No sensor data available to determine the car status."
 
-        prediction = self.prediction_controller.predict(latest_data)
+        prediction = await self.prediction_controller.predict(latest_data)
         if prediction == 1:
             return "Warning: There is a problem with the car. Please check it immediately."
         else:
@@ -99,7 +107,7 @@ class ChatController:
         task = asyncio.create_task(self.sensor_simulator.simulate_data())
 
         # Wait for the simulator to generate some data
-        await asyncio.sleep(1)  # adjust the sleep time according to your needs
+        await asyncio.sleep(1000)  # adjust the sleep time according to your needs
 
         # Get the latest simulated data
         latest_data = self.sensor_simulator.get_latest_data()

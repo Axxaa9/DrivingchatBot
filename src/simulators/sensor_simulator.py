@@ -29,7 +29,7 @@ class SensorSimulator:
             #    print("Alert: Machine requires attention!")
 
             # Wait for a short period before simulating the next data point
-            await asyncio.sleep(5)
+            await asyncio.sleep(3000)
 
     def get_latest_data(self):
         return self.latest_data

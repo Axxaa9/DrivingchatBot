@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     greetUser ();
     getMachineFailurePrediction();
+    setupEnterKeyListener();
 });
 
 document.getElementById('send-button').addEventListener('click', sendMessage);
+document.addEventListener("keydown",setupEnterKeyListener);
 
 function greetUser () {
     fetch('/greet')
@@ -46,21 +48,20 @@ function getMachineFailurePrediction() {
             const warningSign = document.getElementById('warning-sign');
             const normalbehaviour = document.getElementById('prediction-value');
 
-           // predictionResult.textContent = data.prediction;
             if (data.prediction === 0) {
-                normalbehaviour.style.display = 'block'; // Show warning sign
+                normalbehaviour.style.display = 'block';
             } else {
-                normalbehaviour.style.display = 'none'; // Hide warning sign
+                normalbehaviour.style.display = 'none';
             }
             if (data.prediction === 1) {
-                warningSign.style.display = 'block'; // Show warning sign
+                warningSign.style.display = 'block';
             } else {
-                warningSign.style.display = 'none'; // Hide warning sign
+                warningSign.style.display = 'none';
             }
         })
         .catch(error => console.error('Error:', error));
 
-    setTimeout(getMachineFailurePrediction, 1000); // Update every 1 second
+    setTimeout(getMachineFailurePrediction, 1000);
 }
 
 function addMessageToChat(sender, message) {
@@ -68,6 +69,14 @@ function addMessageToChat(sender, message) {
     messageElement.className = 'message ' + (sender === 'You' ? 'user' : 'bot');
     messageElement.textContent = `${sender}: ${message}`;
     document.getElementById('messages').appendChild(messageElement);
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight; // Auto-scroll
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 }
 
+function setupEnterKeyListener() {
+    const inputField = document.getElementById('user-input');
+    inputField.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
+}

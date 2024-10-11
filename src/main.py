@@ -51,7 +51,8 @@ async def greet():
 @app.post("/chat")
 async def chat(request: Request, chat_request: ChatRequest):
     try:
-        response = chat_controller.handle_chat(chat_request.user_input)
+        # Ensure handle_chat is awaited
+        response = await chat_controller.handle_chat(chat_request.user_input)
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
